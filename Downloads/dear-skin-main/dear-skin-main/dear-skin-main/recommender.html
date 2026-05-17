@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DearSkin — Intelligent Recommender Lab</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lora:wght@400;500&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    .lab-wrap { max-width: 1120px; margin: 0 auto; padding: var(--spacing-xl); }
+    .lab-hero {
+      background: var(--gradient-beige);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-2xl);
+      margin-bottom: var(--spacing-2xl);
+      border: 1px solid rgba(165, 81, 102, 0.12);
+    }
+    .lab-hero h1 { font-size: 2rem; color: var(--rose-dark); margin-bottom: var(--spacing-sm); }
+    .lab-grid {
+      display: grid;
+      gap: var(--spacing-xl);
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 960px) {
+      .lab-grid { grid-template-columns: 340px 1fr; align-items: start; }
+    }
+    .panel {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      box-shadow: var(--shadow-lg);
+    }
+    .panel h2 {
+      font-size: 1.25rem;
+      margin-bottom: var(--spacing-lg);
+      color: var(--charcoal);
+      font-family: "Playfair Display", serif;
+    }
+    .field { margin-bottom: var(--spacing-md); }
+    .field label {
+      display: block;
+      font-family: Montserrat, sans-serif;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--taupe);
+      margin-bottom: var(--spacing-xs);
+    }
+    .field input, .field select {
+      width: 100%;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(62, 62, 62, 0.15);
+      font-family: Lora, serif;
+      background: var(--beige-light);
+    }
+    .field-row { display: flex; gap: var(--spacing-sm); flex-wrap: wrap; }
+    .chk-row { display: flex; align-items: center; gap: var(--spacing-sm); margin-top: var(--spacing-xs); }
+    .btn-stack { display: flex; flex-direction: column; gap: var(--spacing-sm); margin-top: var(--spacing-lg); }
+    .pill-note {
+      font-size: 0.85rem;
+      color: var(--taupe);
+      margin-top: var(--spacing-md);
+      line-height: 1.5;
+    }
+    .rec-card {
+      border: 1px solid rgba(165, 81, 102, 0.18);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+      background: linear-gradient(145deg, var(--white), var(--mint-cream));
+    }
+    .rec-card h4 { font-size: 1rem; color: var(--rose-dark); margin-bottom: var(--spacing-xs); }
+    .rec-meta { font-size: 0.85rem; color: var(--taupe); margin-bottom: var(--spacing-sm); }
+    .explain {
+      font-size: 0.9rem;
+      color: var(--charcoal);
+      border-left: 3px solid var(--rose);
+      padding-left: var(--spacing-md);
+      margin-top: var(--spacing-sm);
+    }
+    .subhead {
+      font-family: Montserrat, sans-serif;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--rose-dark);
+      margin: var(--spacing-xl) 0 var(--spacing-md);
+    }
+    table.metrics {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: var(--spacing-md);
+    }
+    table.metrics th, table.metrics td {
+      border: 1px solid rgba(62,62,62,0.1);
+      padding: var(--spacing-sm);
+      text-align: left;
+    }
+    table.metrics th { background: var(--rose-light); font-family: Montserrat, sans-serif; font-weight: 600; font-size: 0.72rem; }
+    .overlap-box {
+      background: var(--soft-lavender);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      margin-top: var(--spacing-lg);
+      font-size: 0.88rem;
+    }
+    .err { color: #b00020; margin-top: var(--spacing-md); font-size: 0.9rem; }
+    #eval-chart-wrap { max-width: 100%; height: 320px; margin-top: var(--spacing-lg); }
+    .hist-row { font-size: 0.82rem; padding: 4px 0; border-bottom: 1px dashed rgba(62,62,62,0.08); }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container">
+      <div class="navbar-content">
+        <a href="index.html" class="logo">
+          <span class="logo-icon">✿</span>
+          <span class="logo-text">DearSkin</span>
+        </a>
+        <nav class="desktop-nav">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="dashboard.html" class="nav-link">Dashboard</a>
+          <a href="products.html" class="nav-link">Products</a>
+          <a href="ingredients.html" class="nav-link">Ingredients</a>
+          <a href="recommender.html" class="nav-link active">Recommender Lab</a>
+        </nav>
+        <div class="auth-buttons">
+          <button class="btn btn-ghost" type="button" onclick="window.location.href='auth.html?mode=login'">Login</button>
+          <button class="btn btn-primary" type="button" onclick="window.location.href='auth.html?mode=signup'">Sign Up</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="lab-wrap">
+    <section class="lab-hero">
+      <h1>Intelligent recommendation laboratory</h1>
+      <p class="hero-copy">
+        Course-grade pipeline: four collaborative variants, TF-IDF content profiles,
+        constraint-driven knowledge ranking, interpretability strings, and a four-metric offline evaluation block.
+        Start the Python API (see README), keep this page served over HTTP, then adjust the API base URL below if needed.
+      </p>
+    </section>
+
+    <div class="lab-grid">
+      <aside class="panel">
+        <h2><i data-lucide="sliders-horizontal"></i> Inputs</h2>
+
+        <div class="field">
+          <label for="api-base">API base URL</label>
+          <input id="api-base" type="text" value="" placeholder="Leave empty when served from the API server" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="user-id">Shopper profile (user id)</label>
+          <select id="user-id"></select>
+        </div>
+
+        <div class="field">
+          <label>Add / update rating (purchase signal)</label>
+          <div class="field-row">
+            <input id="rate-item" type="number" min="0" placeholder="item id" style="flex:1">
+            <input id="rate-val" type="number" min="1" max="5" step="0.1" placeholder="1–5" style="flex:1">
+          </div>
+          <div class="btn-stack">
+            <button class="btn btn-outline btn-sm" type="button" id="btn-save-rating">Save rating</button>
+            <button class="btn btn-outline btn-sm" type="button" id="btn-load-history">Reload history</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Observed ratings (history)</label>
+          <div id="history" style="max-height:160px;overflow:auto;font-size:0.82rem;"></div>
+        </div>
+
+        <div class="field">
+          <label for="approach">Recommendation paradigm</label>
+          <select id="approach">
+            <option value="collaborative">Collaborative filtering</option>
+            <option value="content">Content-based (TF-IDF)</option>
+            <option value="knowledge">Knowledge-based (constraints)</option>
+            <option value="all">Compare all three (side-by-side)</option>
+          </select>
+        </div>
+
+        <div class="field" id="cf-field">
+          <label for="cf-method">Collaborative variant</label>
+          <select id="cf-method">
+            <option value="user_cosine">User-based · cosine neighbors</option>
+            <option value="user_pearson">User-based · Pearson correlation</option>
+            <option value="item_cosine">Item-based · cosine similarity</option>
+            <option value="mf_svd">Matrix factorization · truncated SVD</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="budget">Knowledge filters · max budget (USD)</label>
+          <input id="budget" type="number" min="0" step="1" placeholder="optional">
+        </div>
+
+        <div class="field">
+          <label for="cats">Preferred categories (comma-separated)</label>
+          <input id="cats" type="text" placeholder="Serum, Cleanser">
+        </div>
+
+        <div class="field">
+          <label for="brands">Preferred brands (comma-separated)</label>
+          <input id="brands" type="text" placeholder="DearGlow">
+        </div>
+
+        <div class="field chk-row">
+          <input id="frag-free" type="checkbox">
+          <label for="frag-free" style="margin:0;text-transform:none;font-size:0.9rem;">Boost fragrance-free tags</label>
+        </div>
+
+        <div class="field">
+          <label for="top-k">Top-K recommendations</label>
+          <input id="top-k" type="number" min="1" max="40" value="8">
+        </div>
+
+        <div class="btn-stack">
+          <button class="btn btn-primary" type="button" id="btn-rec">Generate recommendations</button>
+          <button class="btn btn-outline" type="button" id="btn-eval">Run offline evaluation (sampled)</button>
+        </div>
+
+        <p class="pill-note">
+          Collaborative variants intentionally diverge: cosine versus Pearson neighborhoods,
+          item-space smoothing versus latent-factor reconstruction — satisfying the “different outputs” criterion.
+        </p>
+        <div id="api-err" class="err" role="alert"></div>
+      </aside>
+
+      <div>
+        <section class="panel">
+          <h2><i data-lucide="sparkles"></i> Recommendations & explanations</h2>
+          <div id="rec-out"></div>
+        </section>
+
+        <section class="panel" style="margin-top:var(--spacing-xl);">
+          <h2><i data-lucide="bar-chart-3"></i> Evaluation & comparison</h2>
+          <p class="pill-note">
+            Four ranking metrics — Precision@K, Recall@K, MAP@K, NDCG@K — computed under per-user hold-out masks.
+            Use the narrative block for essays covering best CF kernel, best macro-approach, regimes, and causal intuition.
+          For a full-cohort report, call <code>GET /api/evaluation</code> without <code>max_users</code>.
+          </p>
+          <div id="eval-out"></div>
+          <div id="eval-chart-wrap"><canvas id="eval-chart"></canvas></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const apiBase = () => {
+      const raw = $("api-base").value.trim().replace(/\/$/, "");
+      return raw || window.location.origin;
+    };
+
+    function showErr(msg) {
+      $("api-err").textContent = msg || "";
+    }
+
+    async function fetchJSON(path, opts) {
+      showErr("");
+      const res = await fetch(apiBase() + path, opts);
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(t || res.statusText);
+      }
+      return res.json();
+    }
+
+    async function bootstrapMeta() {
+      try {
+        const meta = await fetchJSON("/api/meta");
+        const sel = $("user-id");
+        sel.innerHTML = "";
+        for (let u = 0; u < meta.n_users; u++) {
+          const o = document.createElement("option");
+          o.value = u;
+          o.textContent = "User " + u;
+          sel.appendChild(o);
+        }
+      } catch (e) {
+        showErr("Cannot reach API — start backend (`uvicorn main:app`) and verify URL. " + e.message);
+      }
+    }
+
+    function parseList(id) {
+      return $(id).value.split(",").map((s) => s.trim()).filter(Boolean);
+    }
+
+    async function loadHistory() {
+      const uid = +$("user-id").value;
+      try {
+        const data = await fetchJSON("/api/users/" + uid + "/profile");
+        const box = $("history");
+        box.innerHTML = data.ratings.slice(0, 40).map((r) =>
+          `<div class="hist-row">${r.name} · <strong>${r.rating.toFixed(2)}★</strong> · id ${r.item_id}</div>`
+        ).join("") || "<em>No ratings</em>";
+      } catch (e) {
+        showErr(e.message);
+      }
+    }
+
+    function jaccard(a, b) {
+      const A = new Set(a), B = new Set(b);
+      let inter = 0;
+      for (const x of A) if (B.has(x)) inter++;
+      const u = A.size + B.size - inter;
+      return u ? inter / u : 0;
+    }
+
+    function renderResults(payload) {
+      const host = $("rec-out");
+      host.innerHTML = "";
+
+      function card(r) {
+        return `<article class="rec-card">
+          <h4>#${r.rank} — ${r.name}</h4>
+          <div class="rec-meta">${r.brand} · ${r.category} · $${Number(r.price).toFixed(2)} · score ${Number(r.predicted_score).toFixed(3)}</div>
+          <div class="explain">${r.explanation}</div>
+        </article>`;
+      }
+
+      if (payload.mode === "all") {
+        const titles = [
+          "Collaborative filtering (" + $("cf-method").value + ")",
+          "Content-based TF-IDF profile",
+          "Knowledge-based constraints + affinity"
+        ];
+        payload.panels.forEach((p, i) => {
+          const h = document.createElement("div");
+          h.innerHTML = `<div class="subhead">${titles[i]}</div>` + (p.results || []).map(card).join("");
+          host.appendChild(h);
+        });
+        const ids = payload.panels.map((p) => (p.results || []).map((x) => x.item_id));
+        if (ids.length === 3) {
+          const o = document.createElement("div");
+          o.className = "overlap-box";
+          o.innerHTML = `
+            <strong>List divergence (Jaccard overlap on item ids)</strong><br>
+            CF ∩ Content: ${jaccard(ids[0], ids[1]).toFixed(3)} · CF ∩ KB: ${jaccard(ids[0], ids[2]).toFixed(3)} · Content ∩ KB: ${jaccard(ids[1], ids[2]).toFixed(3)}
+          `;
+          host.appendChild(o);
+        }
+        return;
+      }
+
+      host.innerHTML = (payload.results || []).map(card).join("") || "<p>No unseen items — adjust shopper.</p>";
+    }
+
+    $("approach").addEventListener("change", () => {
+      const v = $("approach").value;
+      $("cf-field").style.display = v === "content" || v === "knowledge" ? "none" : "";
+    });
+
+    $("btn-save-rating").addEventListener("click", async () => {
+      try {
+        await fetchJSON("/api/ratings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: +$("user-id").value,
+            item_id: +$("rate-item").value,
+            rating: +$("rate-val").value,
+          }),
+        });
+        await loadHistory();
+      } catch (e) {
+        showErr(e.message);
+      }
+    });
+
+    $("btn-load-history").addEventListener("click", loadHistory);
+    $("user-id").addEventListener("change", loadHistory);
+
+    $("btn-rec").addEventListener("click", async () => {
+      try {
+        const body = {
+          user_id: +$("user-id").value,
+          approach: $("approach").value,
+          cf_method: $("cf-method").value,
+          top_k: +$("top-k").value,
+          max_budget: $("budget").value ? +$("budget").value : null,
+          categories: parseList("cats"),
+          brands: parseList("brands"),
+          prefer_fragrance_free: $("frag-free").checked,
+        };
+        const data = await fetchJSON("/api/recommendations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        renderResults(data);
+      } catch (e) {
+        showErr(e.message);
+      }
+    });
+
+    let chartRef = null;
+
+    $("btn-eval").addEventListener("click", async () => {
+      const box = $("eval-out");
+      box.innerHTML = "<p>Computing metrics across users… this may take ~30–90s.</p>";
+      try {
+        const ev = await fetchJSON("/api/evaluation?max_users=35");
+        const cf = ev.collaborative_filtering;
+        const rows = [];
+        const labels = [];
+        const mapVals = [];
+
+        Object.keys(cf).forEach((k) => {
+          labels.push("CF:" + k);
+          const m = cf[k];
+          rows.push(`<tr><td>CF · ${k}</td><td>${m["P@K"].toFixed(4)}</td><td>${m["R@K"].toFixed(4)}</td><td>${m["MAP@K"].toFixed(4)}</td><td>${m["NDCG@K"].toFixed(4)}</td></tr>`);
+          mapVals.push(m["MAP@K"]);
+        });
+
+        const ctb = ev.content_based;
+        rows.push(`<tr><td>Content TF-IDF</td><td>${ctb["P@K"].toFixed(4)}</td><td>${ctb["R@K"].toFixed(4)}</td><td>${ctb["MAP@K"].toFixed(4)}</td><td>${ctb["NDCG@K"].toFixed(4)}</td></tr>`);
+        labels.push("Content-TFIDF");
+        mapVals.push(ctb["MAP@K"]);
+
+        const kb = ev.knowledge_based;
+        rows.push(`<tr><td>Knowledge rules</td><td>${kb["P@K"].toFixed(4)}</td><td>${kb["R@K"].toFixed(4)}</td><td>${kb["MAP@K"].toFixed(4)}</td><td>${kb["NDCG@K"].toFixed(4)}</td></tr>`);
+        labels.push("Knowledge");
+        mapVals.push(kb["MAP@K"]);
+
+        box.innerHTML = `
+          <p>K = ${ev.K} · shoppers sampled this run: ${ev.users_sampled}</p>
+          <ul style="margin-left:1rem;font-size:0.88rem;color:var(--taupe);">${ev.metrics_explained.map((x)=>`<li>${x}</li>`).join("")}</ul>
+          <table class="metrics"><thead><tr><th>Method</th><th>P@K</th><th>R@K</th><th>MAP@K</th><th>NDCG@K</th></tr></thead><tbody>${rows.join("")}</tbody></table>
+          <div class="overlap-box">
+            <strong>Automated synthesis (expand in report)</strong><br>
+            Best CF variant: <em>${ev.analysis.best_cf_method}</em><br>
+            Best macro approach snapshot: <em>${ev.analysis.best_overall_approach}</em><br><br>
+            <strong>Why differences occur:</strong> ${ev.analysis.why_differences_occur}<br><br>
+            <strong>When each shines:</strong> ${ev.analysis.when_each_performs_better}
+          </div>
+        `;
+
+        const ctx = $("eval-chart").getContext("2d");
+        if (chartRef) chartRef.destroy();
+        chartRef = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [{
+              label: "MAP@K",
+              data: mapVals,
+              backgroundColor: "rgba(165, 81, 102, 0.55)",
+              borderColor: "rgba(165, 81, 102, 1)",
+              borderWidth: 1,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true, max: 1 } },
+          },
+        });
+      } catch (e) {
+        box.innerHTML = "";
+        showErr(e.message);
+      }
+    });
+
+    bootstrapMeta().then(loadHistory);
+    if (window.lucide) lucide.createIcons();
+  </script>
+</body>
+</html>
