@@ -1,0 +1,7 @@
+supabase.js
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
